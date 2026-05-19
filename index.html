@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>IQRPG login</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; padding: 1.5em; color: #222; }
+  #status { font-size: 1.1em; }
+  .err { color: #b00; }
+</style>
+</head>
+<body>
+<p id="status">Reading credentials...</p>
+<script>
+(function () {
+  var status = document.getElementById('status');
+  function fail(msg) { status.textContent = msg; status.className = 'err'; }
+
+  var hash = location.hash.replace(/^#/, '');
+  if (!hash) { fail('No credentials in URL fragment (expected #u=...&p=...).'); return; }
+
+  var params = {};
+  hash.split('&').forEach(function (kv) {
+    var eq = kv.indexOf('=');
+    if (eq < 0) return;
+    try {
+      params[decodeURIComponent(kv.slice(0, eq))] = decodeURIComponent(kv.slice(eq + 1));
+    } catch (e) {}
+  });
+
+  var u = params.u, p = params.p;
+  if (!u || !p) { fail('Missing u or p in fragment.'); return; }
+
+  status.textContent = 'Logging in as ' + u + '...';
+
+  var form = document.createElement('form');
+  form.method = 'POST';
+  form.action = 'https://www.iqrpg.com/login.php';
+
+  var fu = document.createElement('input');
+  fu.type = 'hidden'; fu.name = 'login_username'; fu.value = u;
+  var fp = document.createElement('input');
+  fp.type = 'hidden'; fp.name = 'login_password'; fp.value = p;
+
+  form.appendChild(fu);
+  form.appendChild(fp);
+  document.body.appendChild(form);
+  form.submit();
+})();
+</script>
+</body>
+</html>
